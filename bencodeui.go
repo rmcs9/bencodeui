@@ -1,22 +1,23 @@
 package main
 
 import (
-	"bencodeui/bencode"
 	"fmt"
 	"log"
     "os"
 
 	"github.com/jroimartin/gocui"
+    "github.com/rmcs9/benparser"
 )
 
-var benmap *map[string]interface{}
+var benmap benparser.Benmap
 
 func main() {
 
     if len(os.Args) != 2 {
         log.Fatal("a single bencode file argument must be provided")
     }
-	benmap, _ = bencode.ParseFile(os.Args[1])
+    ben := benparser.ParseFile(os.Args[1])
+    benmap = ben.(benparser.Benmap)
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
@@ -60,7 +61,7 @@ var cursorUp = func(g *gocui.Gui, v *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
     maxX, maxY := g.Size()
-    if v, err := g.SetView("dir", 0, 0, 30, maxY-1); err != nil {
+    if v, err := g.SetView("dir", 0, 0, 30, (maxY / 2) - 2); err != nil {
         if err != gocui.ErrUnknownView {
             return err
         }
@@ -70,9 +71,16 @@ func layout(g *gocui.Gui) error {
         v.SelBgColor = gocui.ColorBlue
         v.Highlight = true
 
-        for key := range *benmap {
+        for _, key := range benmap.Keys() {
             fmt.Fprintf(v, "%s\n", key)
         }
+    }
+
+    if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
+        if err != gocui.ErrUnknownView {
+            return err
+        }
+        v.Title = "info"
     }
 
     if v, err := g.SetView("content", 31, 0, maxX -1, maxY -1); err != nil {
