@@ -9,20 +9,20 @@ import (
     "github.com/rmcs9/benparser"
 )
 
-var benmap benparser.Benmap
+var benval benparser.Benval
 
 func main() {
 
     if len(os.Args) != 2 {
         log.Fatal("a single bencode file argument must be provided")
     }
-    ben := benparser.ParseFile(os.Args[1])
-    benmap = ben.(benparser.Benmap)
+    benval = benparser.ParseFile(os.Args[1])
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer g.Close()
+
 
 	g.SetManagerFunc(layout)
 
@@ -48,14 +48,12 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 var cursorDown = func(g *gocui.Gui, v *gocui.View) error {
-    x, y := v.Cursor()
-    v.SetCursor(x, y-1)       
+    v.MoveCursor(0, 1, false)
     return nil
 }
 
 var cursorUp = func(g *gocui.Gui, v *gocui.View) error {
-    x,y := v.Cursor()
-    v.SetCursor(x, y+1)
+    v.MoveCursor(0, -1, false)
     return nil
 }
 
@@ -71,9 +69,18 @@ func layout(g *gocui.Gui) error {
         v.SelBgColor = gocui.ColorBlue
         v.Highlight = true
 
-        for _, key := range benmap.Keys() {
-            fmt.Fprintf(v, "%s\n", key)
+        switch benval.Kind() {
+            case benparser.Map : 
+                drawMapDir(v, benval, 1)
+            case benparser.List:
+                drawListDir(v, benval, 1)
+            case benparser.Int :
+                drawIntDir(v)
+            case benparser.String: 
+                drawStringDir(v)
         }
+
+
     }
 
     if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
@@ -88,7 +95,8 @@ func layout(g *gocui.Gui) error {
             return err
         }
         v.Title = "content"
-        fmt.Fprintf(v, "right panel. maxX is: %d MaxY is: %d", maxX, maxY)
+        v.Wrap = true
+        fmt.Fprintf(v, "%s", "TEST")
     }
 
     g.SetCurrentView("dir")
