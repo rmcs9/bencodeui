@@ -1,9 +1,10 @@
-package main 
+package main
 
 
 import (
     "fmt"
     "strings"
+    "sort"
 
     "github.com/jroimartin/gocui"
     "github.com/rmcs9/benparser"
@@ -16,7 +17,8 @@ func drawMapDir(v *gocui.View, m benparser.Benval, lvl int) {
 
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s\n", "d") 
 
-    for _, key := range benmap.Keys() {
+    keys := benmap.Keys(); sort.Strings(keys)
+    for  _, key := range keys {
         fstring := strings.Repeat("\t\t", lvl) + "%s\n"
 
         fmt.Fprintf(v, fstring, key)
@@ -69,7 +71,8 @@ func drawMapContent(v *gocui.View, m benparser.Benval, lvl int) {
     benmap := m.(benparser.Benmap)
 
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s\n", "d")
-    for _, key := range benmap.Keys() {
+    keys := benmap.Keys(); sort.Strings(keys)
+    for _, key := range keys {
         fmt.Fprint(v, strings.Repeat("\t\t", lvl))
         fmt.Fprintf(v, "%d:%s", len(key), key)
         subp, _ := benmap.Query(key)
@@ -127,6 +130,6 @@ func drawStringContent(v *gocui.View, s benparser.Benval) {
         fmt.Fprintf(v, "%d:%s", len(benstring.Raw()), benstring.Raw())
         //else, hide it... TODO: maybe later on add a show function to draw the bytes anyway
     } else {
-        fmt.Fprintf(v, "%d:LARGE BYTESTRING HIDDEN...", len(benstring.Get()))
+        fmt.Fprintf(v, "%d:[***LARGE BYTESTRING HIDDEN***]", len(benstring.Get()))
     }
 }
