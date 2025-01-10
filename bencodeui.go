@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
     "os"
 
@@ -96,7 +96,12 @@ func layout(g *gocui.Gui) error {
         }
         v.Title = "content"
         v.Wrap = true
-        fmt.Fprintf(v, "%s", "TEST")
+        switch benval.Kind() {
+            case benparser.Map: drawMapContent(v, benval, 1)
+            case benparser.List: drawListContent(v, benval, 1)
+            case benparser.Int: drawIntContent(v, benval)
+            case benparser.String: drawStringContent(v, benval)
+        }
     }
 
     g.SetCurrentView("dir")
