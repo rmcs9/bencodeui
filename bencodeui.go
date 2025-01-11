@@ -50,6 +50,9 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 var curs int = 0
 
 var cursorDown = func(g *gocui.Gui, v *gocui.View) error {
+    if curs == len(v.BufferLines()) - 2 {
+        return nil
+    }
     v.MoveCursor(0, 1, false)
     curs++
     cview, err := g.View("content")
@@ -69,6 +72,9 @@ var cursorDown = func(g *gocui.Gui, v *gocui.View) error {
 }
 
 var cursorUp = func(g *gocui.Gui, v *gocui.View) error {
+    if curs == 0 {
+        return nil
+    }
     v.MoveCursor(0, -1, false)
     curs--
     cview, err := g.View("content")
