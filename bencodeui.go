@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"log"
     "os"
 
@@ -47,15 +47,46 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
+var curs int = 0
+
 var cursorDown = func(g *gocui.Gui, v *gocui.View) error {
     v.MoveCursor(0, 1, false)
+    curs++
+    cview, err := g.View("content")
+    if err != nil {
+        log.Fatal(err)
+    }
+    iview, err := g.View("info")
+    if err != nil {
+        log.Fatal(err)
+    }
+    cview.Clear()
+    target = index[curs]
+    drawContent(cview, false)
+    iview.Clear() 
+    fmt.Fprintf(iview, "cursor: %d", curs)
     return nil
 }
 
 var cursorUp = func(g *gocui.Gui, v *gocui.View) error {
     v.MoveCursor(0, -1, false)
+    curs--
+    cview, err := g.View("content")
+    if err != nil {
+        log.Fatal(err)
+    }
+    iview, err := g.View("info")
+    if err != nil {
+        log.Fatal(err)
+    }
+    cview.Clear()
+    target = index[curs]
+    drawContent(cview, false)
+    iview.Clear() 
+    fmt.Fprintf(iview, "cursor: %d", curs)
     return nil
 }
+
 
 func layout(g *gocui.Gui) error {
     maxX, maxY := g.Size()
@@ -64,7 +95,7 @@ func layout(g *gocui.Gui) error {
             return err
         }
         v.Title = "dir"
-        v.SetCursor(0,1)
+        v.SetCursor(0,0)
         v.SelFgColor = gocui.ColorBlack
         v.SelBgColor = gocui.ColorBlue
         v.Highlight = true
@@ -79,14 +110,15 @@ func layout(g *gocui.Gui) error {
             case benparser.String: 
                 drawStringDir(v)
         }
-
-
     }
+
+    target = &benval
 
     if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
         if err != gocui.ErrUnknownView {
             return err
         }
+        fmt.Fprintln(v, target)
         v.Title = "info"
     }
 
@@ -96,14 +128,10 @@ func layout(g *gocui.Gui) error {
         }
         v.Title = "content"
         v.Wrap = true
-        switch benval.Kind() {
-            case benparser.Map: drawMapContent(v, benval, 1)
-            case benparser.List: drawListContent(v, benval, 1)
-            case benparser.Int: drawIntContent(v, benval)
-            case benparser.String: drawStringContent(v, benval)
-        }
+        drawContent(v, true)
     }
 
+    // target = index[0]
     g.SetCurrentView("dir")
     return nil
 }
