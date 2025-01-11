@@ -67,7 +67,9 @@ var cursorDown = func(g *gocui.Gui, v *gocui.View) error {
     target = index[curs]
     drawContent(cview, false)
     iview.Clear() 
-    fmt.Fprintf(iview, "cursor: %d", curs)
+    ox, oy := cview.Origin() 
+    err = cview.SetOrigin(ox, oy + 1)
+    fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d", curs, ox, oy)
     return nil
 }
 
@@ -89,7 +91,9 @@ var cursorUp = func(g *gocui.Gui, v *gocui.View) error {
     target = index[curs]
     drawContent(cview, false)
     iview.Clear() 
-    fmt.Fprintf(iview, "cursor: %d", curs)
+    ox, oy := cview.Origin() 
+    err = cview.SetOrigin(ox, oy - 1)
+    fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d", curs, ox, oy)
     return nil
 }
 

@@ -18,6 +18,7 @@ func drawMapDir(v *gocui.View, m benparser.Benval, lvl int) {
     benmap := m.(benparser.Benmap)
 
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s\n", "d") 
+    // fmt.Fprintf(v, "%s\n", "d") 
 
     keys := benmap.Keys(); sort.Strings(keys)
     for  _, key := range keys {
@@ -44,6 +45,7 @@ func drawListDir(v *gocui.View, l benparser.Benval, lvl int) {
     benlist := l.(benparser.Benlist) 
 
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s\n", "l")
+    // fmt.Fprintf(v, "%s\n", "l")
 
     for i := range benlist.Len() {
         fstring := strings.Repeat("\t\t", lvl) + "[%d]"
