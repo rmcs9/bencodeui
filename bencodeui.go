@@ -30,11 +30,11 @@ func main() {
 		log.Panicln(err)
 	}
 
-    if err := g.SetKeybinding("", 'j', gocui.ModNone, cursorDown); err != nil {
+    if err := g.SetKeybinding("", 'j', gocui.ModNone, moveCursor(1)); err != nil {
         log.Panicln(err)
     }
 
-    if err := g.SetKeybinding("", 'k', gocui.ModNone, cursorUp); err != nil {
+    if err := g.SetKeybinding("", 'k', gocui.ModNone, moveCursor(-1)); err != nil {
         log.Panicln(err)
     }
 
@@ -49,52 +49,38 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 
 var curs int = 0
 
-var cursorDown = func(g *gocui.Gui, v *gocui.View) error {
-    if curs == len(v.BufferLines()) - 2 {
-        return nil
-    }
-    v.MoveCursor(0, 1, false)
-    curs++
-    cview, err := g.View("content")
-    if err != nil {
-        log.Fatal(err)
-    }
-    iview, err := g.View("info")
-    if err != nil {
-        log.Fatal(err)
-    }
-    cview.Clear()
-    target = index[curs]
-    drawContent(cview, false)
-    iview.Clear() 
-    ox, oy := cview.Origin() 
-    err = cview.SetOrigin(ox, oy + 1)
-    fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d", curs, ox, oy)
-    return nil
-}
+func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
+    return func(g *gocui.Gui, v *gocui.View) error {
+        if (curs == 0 && dy < 0) || (curs == len(v.BufferLines()) - 2 && dy > 0) {
+            return nil
+        }
 
-var cursorUp = func(g *gocui.Gui, v *gocui.View) error {
-    if curs == 0 {
+        v.MoveCursor(0, dy, false)
+        curs += dy
+
+        cview, err := g.View("content")
+        if err != nil {
+            return err
+        }
+
+        iview, err := g.View("info")
+        if err != nil {
+            return err
+        }
+        target = index[curs] 
+        drawContent(cview, false)
+        iview.Clear() 
+        ox, oy := cview.Origin() 
+        _, cy := cview.Size()
+
+        if err := cview.SetOrigin(ox, oy + dy); err != nil {
+            return err
+        }
+
+        ox, oy = cview.Origin() 
+        fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d\nContent buffer:%d\nContent ylength:%d", curs, ox, oy, len(cview.BufferLines()), cy)
         return nil
     }
-    v.MoveCursor(0, -1, false)
-    curs--
-    cview, err := g.View("content")
-    if err != nil {
-        log.Fatal(err)
-    }
-    iview, err := g.View("info")
-    if err != nil {
-        log.Fatal(err)
-    }
-    cview.Clear()
-    target = index[curs]
-    drawContent(cview, false)
-    iview.Clear() 
-    ox, oy := cview.Origin() 
-    err = cview.SetOrigin(ox, oy - 1)
-    fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d", curs, ox, oy)
-    return nil
 }
 
 
