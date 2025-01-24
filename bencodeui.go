@@ -51,7 +51,7 @@ var curs int = 0
 
 func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
     return func(g *gocui.Gui, v *gocui.View) error {
-        if (curs == 0 && dy < 0) || (curs == len(v.BufferLines()) - 2 && dy > 0) {
+        if (curs == 0 && dy < 0) || (curs == len(v.BufferLines()) - 2 && dy > 0) || len(v.BufferLines()) == 1 {
             return nil
         }
 
@@ -78,7 +78,7 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
         }
 
         ox, oy = cview.Origin() 
-        fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d\nContent buffer:%d\nContent ylength:%d", curs, ox, oy, len(cview.BufferLines()), cy)
+        fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d\nContent buffer:%d\ndir buffer:%d\nContent ylength:%d", curs, ox, oy, len(cview.BufferLines()), len(v.BufferLines()), cy)
         return nil
     }
 }
@@ -90,7 +90,6 @@ func layout(g *gocui.Gui) error {
         if err != gocui.ErrUnknownView {
             return err
         }
-        v.Title = "dir"
         v.SetCursor(0,0)
         v.SelFgColor = gocui.ColorBlack
         v.SelBgColor = gocui.ColorBlue
@@ -98,17 +97,19 @@ func layout(g *gocui.Gui) error {
 
         switch benval.Kind() {
             case benparser.Map : 
-                drawMapDir(v, benval, 1)
+                drawMapDir(v, benval, 0)
+                v.Title = " dir - map "
             case benparser.List:
-                drawListDir(v, benval, 1)
+                drawListDir(v, benval, 0)
+                v.Title = " dir - list "
             case benparser.Int :
                 drawIntDir(v)
+                v.Title = " dir - int "
             case benparser.String: 
                 drawStringDir(v)
+                v.Title = " dir - string "
         }
     }
-
-    target = &benval
 
     if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
         if err != gocui.ErrUnknownView {
@@ -127,7 +128,6 @@ func layout(g *gocui.Gui) error {
         drawContent(v, true)
     }
 
-    // target = index[0]
     g.SetCurrentView("dir")
     return nil
 }
