@@ -73,8 +73,10 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
         ox, oy := cview.Origin() 
         _, cy := cview.Size()
 
-        if err := cview.SetOrigin(ox, oy + dy); err != nil {
-            return err
+        if len(cview.BufferLines()) > cy {
+            if err := cview.SetOrigin(ox, oy + dy); err != nil {
+                return err
+            }
         }
 
         ox, oy = cview.Origin() 
@@ -96,18 +98,18 @@ func layout(g *gocui.Gui) error {
         v.Highlight = true
 
         switch benval.Kind() {
-            case benparser.Map : 
-                drawMapDir(v, benval, 0)
-                v.Title = " dir - map "
-            case benparser.List:
-                drawListDir(v, benval, 0)
-                v.Title = " dir - list "
-            case benparser.Int :
-                drawIntDir(v)
-                v.Title = " dir - int "
-            case benparser.String: 
-                drawStringDir(v)
-                v.Title = " dir - string "
+        case benparser.Map : 
+            drawMapDir(v, benval, 0)
+            v.Title = " dir - map "
+        case benparser.List:
+            drawListDir(v, benval, 0)
+            v.Title = " dir - list "
+        case benparser.Int :
+            drawIntDir(v)
+            v.Title = " dir - int "
+        case benparser.String: 
+            drawStringDir(v)
+            v.Title = " dir - string "
         }
     }
 
