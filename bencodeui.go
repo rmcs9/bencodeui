@@ -99,10 +99,10 @@ func layout(g *gocui.Gui) error {
 
         switch benval.Kind() {
         case benparser.Map : 
-            drawMapDir(v, benval, 0)
+            drawMapDir(v, benval, "")
             v.Title = " dir - map "
         case benparser.List:
-            drawListDir(v, benval, 0)
+            drawListDir(v, benval, "")
             v.Title = " dir - list "
         case benparser.Int :
             drawIntDir(v)

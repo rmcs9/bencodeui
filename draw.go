@@ -14,40 +14,56 @@ var index map[int]*benparser.Benval = make(map[int]*benparser.Benval)
 var target *benparser.Benval
 
 // ----------- DIRECTORY DRAW FUNCTIONS ---------------------
-func drawMapDir(v *gocui.View, m benparser.Benval, lvl int) {
+func drawMapDir(v *gocui.View, m benparser.Benval, prefix string) {
     benmap := m.(benparser.Benmap)
 
     keys := benmap.Keys(); sort.Strings(keys)
-    for  _, key := range keys {
-        fstring := strings.Repeat("\t\t", lvl) + "%s\n"
+    for  i, key := range keys {
+        fstring := ""
+        newprefix := ""
+        if i == len(keys) - 1 {
+            fstring = fmt.Sprintf("%s└─%s\n", prefix, key)
+            newprefix = prefix +  "  "
+        } else {
+            fstring = fmt.Sprintf("%s├─%s\n", prefix, key)
+            newprefix = prefix + "│ "
+        }
 
         if sub, _ := benmap.Query(key); (*sub).Kind() == benparser.Map {
-            fmt.Fprintf(v, fstring, key)
-            drawMapDir(v, *sub, lvl + 1) 
+            fmt.Fprint(v, fstring)
+            drawMapDir(v, *sub, newprefix)
         } else if (*sub).Kind() == benparser.List {
-            fmt.Fprintf(v, fstring, key)
-            drawListDir(v, *sub, lvl + 1)
+            fmt.Fprint(v, fstring)
+            drawListDir(v, *sub, newprefix)
         } else {
-            fmt.Fprintf(v, fstring, key)
+            fmt.Fprint(v, fstring)
         }
 
     }
 }
 
-func drawListDir(v *gocui.View, l benparser.Benval, lvl int) {
+func drawListDir(v *gocui.View, l benparser.Benval, prefix string) {
     benlist := l.(benparser.Benlist) 
 
     for i := range benlist.Len() {
-        fstring := strings.Repeat("\t\t", lvl) + "[%d]\n"
+        fstring := ""
+        newprefix := ""
+        if i == benlist.Len() - 1 {
+            fstring = fmt.Sprintf("%s└─[%d]\n", prefix, i)
+            newprefix = prefix + "  "
+        } else {
+            fstring = fmt.Sprintf("%s├─[%d]\n", prefix, i)
+            newprefix = prefix + "│ "
+        }
 
         if sub := benlist.Get(i); (*sub).Kind() == benparser.Map {
-            fmt.Fprintf(v, fstring, i)
-            drawMapDir(v, *sub, lvl + 1) 
+            fmt.Fprint(v, fstring)
+            drawMapDir(v, *sub, newprefix)
         } else if (*sub).Kind() == benparser.List {
-            fmt.Fprintf(v, fstring, i)
-            drawListDir(v, *sub, lvl + 1)
+            fmt.Fprint(v, fstring)
+            drawListDir(v, *sub, newprefix)
         } else {
-            fmt.Fprintf(v, fstring, i)
+            fmt.Fprint(v, fstring)
         }
     }
 }
@@ -71,10 +87,10 @@ var id int = -1
 func drawContent(v *gocui.View, init bool) {
     v.Clear()
     switch benval.Kind() {
-        case benparser.Map: drawMapContent(v, &benval, 1, init);
-        case benparser.List: drawListContent(v, &benval, 1, init)
-        case benparser.Int: drawIntContent(v, &benval, init)
-        case benparser.String: drawStringContent(v, &benval, init)
+    case benparser.Map: drawMapContent(v, &benval, 1, init);
+    case benparser.List: drawListContent(v, &benval, 1, init)
+    case benparser.Int: drawIntContent(v, &benval, init)
+    case benparser.String: drawStringContent(v, &benval, init)
     }
 }
 
@@ -96,16 +112,16 @@ func drawMapContent(v *gocui.View, m *benparser.Benval, lvl int, init bool) {
         fmt.Fprintf(v, "%d:%s", len(key), key)
         sub, _ := benmap.Query(key)
         switch (*sub).Kind() {
-            case benparser.Map: 
-                fmt.Fprint(v, "\n")
-                drawMapContent(v, sub, lvl + 1, init)
-            case benparser.List: 
-                fmt.Fprint(v, "\n")
-                drawListContent(v, sub, lvl + 1, init)
-            case benparser.Int: 
-                drawIntContent(v, sub, init)
-            case benparser.String: 
-                drawStringContent(v, sub, init)
+        case benparser.Map: 
+            fmt.Fprint(v, "\n")
+            drawMapContent(v, sub, lvl + 1, init)
+        case benparser.List: 
+            fmt.Fprint(v, "\n")
+            drawListContent(v, sub, lvl + 1, init)
+        case benparser.Int: 
+            drawIntContent(v, sub, init)
+        case benparser.String: 
+            drawStringContent(v, sub, init)
         }
         fmt.Fprint(v, "\n")
     }
@@ -130,16 +146,16 @@ func drawListContent(v *gocui.View, l *benparser.Benval, lvl int, init bool) {
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s\n", "l")
     for i := range benlist.Len() {
         switch sub := benlist.Get(i); (*sub).Kind() {
-            case benparser.Map: 
-                drawMapContent(v, sub, lvl + 1, init)
-            case benparser.List: 
-                drawListContent(v, sub, lvl + 1, init)
-            case benparser.Int: 
-                fmt.Fprint(v, strings.Repeat("\t\t", lvl))
-                drawIntContent(v, sub, init)
-            case benparser.String: 
-                fmt.Fprint(v, strings.Repeat("\t\t", lvl))
-                drawStringContent(v, sub, init)
+        case benparser.Map: 
+            drawMapContent(v, sub, lvl + 1, init)
+        case benparser.List: 
+            drawListContent(v, sub, lvl + 1, init)
+        case benparser.Int: 
+            fmt.Fprint(v, strings.Repeat("\t\t", lvl))
+            drawIntContent(v, sub, init)
+        case benparser.String: 
+            fmt.Fprint(v, strings.Repeat("\t\t", lvl))
+            drawStringContent(v, sub, init)
         }
         fmt.Fprint(v, "\n")
     }
