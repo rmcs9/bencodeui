@@ -68,7 +68,7 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
             return err
         }
         target = index[curs] 
-        drawContent(cview, false)
+        drawContent(cview)
         iview.Clear() 
         ox, oy := cview.Origin() 
         _, cy := cview.Size()
@@ -127,7 +127,9 @@ func layout(g *gocui.Gui) error {
         }
         v.Title = "content"
         v.Wrap = true
-        drawContent(v, true)
+        indexInit(&benval)
+        target = index[0]
+        drawContent(v)
     }
 
     g.SetCurrentView("dir")

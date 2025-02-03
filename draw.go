@@ -10,8 +10,6 @@ import (
     "github.com/rmcs9/benparser"
 )
 
-var index map[int]*benparser.Benval = make(map[int]*benparser.Benval)
-var target *benparser.Benval
 
 // ----------- DIRECTORY DRAW FUNCTIONS ---------------------
 func drawMapDir(v *gocui.View, m benparser.Benval, prefix string) {
@@ -82,26 +80,21 @@ func drawStringDir(v *gocui.View) {
 
 // ----------- CONTENT WINDOW DRAW FUNCTIONS ------------------
 
-var id int = -1
 
-func drawContent(v *gocui.View, init bool) {
+func drawContent(v *gocui.View) {
     v.Clear()
     switch benval.Kind() {
-    case benparser.Map: drawMapContent(v, &benval, 1, init);
-    case benparser.List: drawListContent(v, &benval, 1, init)
-    case benparser.Int: drawIntContent(v, &benval, init)
-    case benparser.String: drawStringContent(v, &benval, init)
+    case benparser.Map: drawMapContent(v, &benval, 1);
+    case benparser.List: drawListContent(v, &benval, 1)
+    case benparser.Int: drawIntContent(v, &benval)
+    case benparser.String: drawStringContent(v, &benval)
     }
 }
 
-func drawMapContent(v *gocui.View, m *benparser.Benval, lvl int, init bool) {
-    if init { 
-        index[id] = m  
-        id++ 
-    }
+func drawMapContent(v *gocui.View, m *benparser.Benval, lvl int) {
     benmap := (*m).(benparser.Benmap)
 
-    if m == target && !init {
+    if m == target{
         fmt.Fprint(v, "\x1b[34;7m")
     }
 
@@ -114,32 +107,27 @@ func drawMapContent(v *gocui.View, m *benparser.Benval, lvl int, init bool) {
         switch (*sub).Kind() {
         case benparser.Map: 
             fmt.Fprint(v, "\n")
-            drawMapContent(v, sub, lvl + 1, init)
+            drawMapContent(v, sub, lvl + 1)
         case benparser.List: 
             fmt.Fprint(v, "\n")
-            drawListContent(v, sub, lvl + 1, init)
+            drawListContent(v, sub, lvl + 1)
         case benparser.Int: 
-            drawIntContent(v, sub, init)
+            drawIntContent(v, sub)
         case benparser.String: 
-            drawStringContent(v, sub, init)
+            drawStringContent(v, sub)
         }
         fmt.Fprint(v, "\n")
     }
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s", "e")
-    if m == target && !init {
+    if m == target {
         fmt.Fprint(v, "\x1b[0m")
     }
-    // if init { index[id] = m; id++ }
 }
 
-func drawListContent(v *gocui.View, l *benparser.Benval, lvl int, init bool) {
-    if init { 
-        index[id] = l
-        id++ 
-    }
+func drawListContent(v *gocui.View, l *benparser.Benval, lvl int) {
     benlist := (*l).(benparser.Benlist)
 
-    if l == target && !init {
+    if l == target {
         fmt.Fprint(v, "\x1b[34;7m")
     }
 
@@ -147,27 +135,25 @@ func drawListContent(v *gocui.View, l *benparser.Benval, lvl int, init bool) {
     for i := range benlist.Len() {
         switch sub := benlist.Get(i); (*sub).Kind() {
         case benparser.Map: 
-            drawMapContent(v, sub, lvl + 1, init)
+            drawMapContent(v, sub, lvl + 1)
         case benparser.List: 
-            drawListContent(v, sub, lvl + 1, init)
+            drawListContent(v, sub, lvl + 1)
         case benparser.Int: 
             fmt.Fprint(v, strings.Repeat("\t\t", lvl))
-            drawIntContent(v, sub, init)
+            drawIntContent(v, sub)
         case benparser.String: 
             fmt.Fprint(v, strings.Repeat("\t\t", lvl))
-            drawStringContent(v, sub, init)
+            drawStringContent(v, sub)
         }
         fmt.Fprint(v, "\n")
     }
     fmt.Fprintf(v, strings.Repeat("\t\t", lvl - 1) + "%s", "e")
-    if l == target && !init {
+    if l == target {
         fmt.Fprint(v, "\x1b[0m")
     }
-    // if init { index[id] = l; id++ }
 }
 
-func drawIntContent(v *gocui.View, i *benparser.Benval, init bool) {
-    if init { index[id] = i; id++ }
+func drawIntContent(v *gocui.View, i *benparser.Benval) {
     benint := (*i).(benparser.Benint)
     if i == target {
         fmt.Fprintf(v, "\x1b[34;7m%s\x1b[0m", benint.Raw())
@@ -176,8 +162,7 @@ func drawIntContent(v *gocui.View, i *benparser.Benval, init bool) {
     }
 }
 
-func drawStringContent(v *gocui.View, s *benparser.Benval, init bool) {
-    if init { index[id] = s; id++ }
+func drawStringContent(v *gocui.View, s *benparser.Benval) {
     benstring := (*s).(benparser.Benstring)
 
     if s == target {
@@ -196,46 +181,3 @@ func drawStringContent(v *gocui.View, s *benparser.Benval, init bool) {
         fmt.Fprint(v, "\x1b[0m")
     }
 }
-
-
-// type Node struct {
-//     Str string 
-//     Val *benparser.Benval
-//     Children []*Node
-// }
-//
-// func walkContent(r benparser.Benval) *Node {
-//     root := new(Node)
-//     
-//     switch r.Kind() {
-//         case benparser.Map: walkMap(r.(benparser.Benmap), root) 
-//         case benparser.List: walkList(r.(benparser.Benlist), root) 
-//         case benparser.Int: walkInt(r.(benparser.Benint), root)
-//         case benparser.String: walkString(r.(benparser.Benstring), root)
-//     }
-//     
-//     return root
-// }
-//
-// func walkMap(m benparser.Benmap, n *Node) {
-//     str := "d"
-//     keys := m.Keys()
-//
-//     for _, key := range keys {
-//         sub, _ := m.Query(key)
-//
-//
-//     }
-// }
-//
-// func walkList(l benparser.Benlist, n *Node) {
-//
-// }
-//
-// func walkInt(i benparser.Benint, n *Node) {
-//
-// }
-//
-// func walkString(s benparser.Benstring, n *Node) {
-//
-// }
