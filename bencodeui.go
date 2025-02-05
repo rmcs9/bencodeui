@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
     "os"
 
@@ -69,7 +69,8 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
         }
         target = index[curs] 
         drawContent(cview)
-        iview.Clear() 
+        drawInfo(iview)
+        // iview.Clear() 
         ox, oy := cview.Origin() 
         _, cy := cview.Size()
 
@@ -79,8 +80,8 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
             }
         }
 
-        ox, oy = cview.Origin() 
-        fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d\nContent buffer:%d\ndir buffer:%d\nContent ylength:%d", curs, ox, oy, len(cview.BufferLines()), len(v.BufferLines()), cy)
+        // ox, oy = cview.Origin() 
+        // fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d\nContent buffer:%d\ndir buffer:%d\nContent ylength:%d", curs, ox, oy, len(cview.BufferLines()), len(v.BufferLines()), cy)
         return nil
     }
 }
@@ -113,14 +114,6 @@ func layout(g *gocui.Gui) error {
         }
     }
 
-    if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
-        if err != gocui.ErrUnknownView {
-            return err
-        }
-        fmt.Fprintln(v, target)
-        v.Title = "info"
-    }
-
     if v, err := g.SetView("content", 31, 0, maxX -1, maxY -1); err != nil {
         if err != gocui.ErrUnknownView {
             return err
@@ -132,6 +125,13 @@ func layout(g *gocui.Gui) error {
         drawContent(v)
     }
 
+    if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
+        if err != gocui.ErrUnknownView {
+            return err
+        }
+        v.Title = "info"
+        drawInfo(v)
+    }
     g.SetCurrentView("dir")
     return nil
 }

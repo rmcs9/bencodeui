@@ -172,12 +172,38 @@ func drawStringContent(v *gocui.View, s *benparser.Benval) {
     //if the string is 100 bytes or less, draw it
     if len(benstring.Get()) <= 100 {
         fmt.Fprintf(v, "%d:%s", len(benstring.Raw()), benstring.Raw())
-        //else, hide it... TODO: maybe later on add a show function to draw the bytes anyway
+    //else, hide it... TODO: maybe later on add a show function to draw the bytes anyway
     } else {
         fmt.Fprintf(v, "%d:[***LARGE BYTESTRING HIDDEN***]", len(benstring.Get()))
     }
 
     if s == target {
         fmt.Fprint(v, "\x1b[0m")
+    }
+}
+
+// -----------------------------------------INFO DRAW---------------------------------------------------
+
+func drawInfo(v *gocui.View) {
+    //TODO
+    //STATIC FILE INFORMATION
+    //ENTIRE FILE SIZE 
+    v.Clear()
+
+    switch (*target).Kind() {
+    case benparser.Map: 
+        fmt.Fprintln(v, "TYPE: MAP")
+        fmt.Fprintf(v, "BYTE SIZE: %d\n", len((*target).(benparser.Benmap).Raw()))
+        fmt.Fprintf(v, "# OF KEYS: %d\n", len((*target).(benparser.Benmap).Keys()))
+    case benparser.List:
+        fmt.Fprintln(v, "TYPE: LIST")
+        fmt.Fprintf(v, "BYTE SIZE: %d\n", len((*target).(benparser.Benlist).Raw()))
+        fmt.Fprintf(v, "LIST SIZE: %d\n", (*target).(benparser.Benlist).Len())
+    case benparser.Int:
+        fmt.Fprintln(v, "TYPE: INT")
+        fmt.Fprintf(v, "VALUE: %d", (*target).(benparser.Benint).Get())
+    case benparser.String:
+        fmt.Fprintln(v, "TYPE: BYTESTRING")
+        fmt.Fprintf(v, "BYTE SIZE: %d\n", len((*target).(benparser.Benstring).Get()))
     }
 }
