@@ -70,7 +70,6 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
         target = index[curs] 
         drawContent(cview)
         drawInfo(iview)
-        // iview.Clear() 
         ox, oy := cview.Origin() 
         _, cy := cview.Size()
 
@@ -79,9 +78,6 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
                 return err
             }
         }
-
-        // ox, oy = cview.Origin() 
-        // fmt.Fprintf(iview, "cursor: %d\nOrigin: x:%d y:%d\nContent buffer:%d\ndir buffer:%d\nContent ylength:%d", curs, ox, oy, len(cview.BufferLines()), len(v.BufferLines()), cy)
         return nil
     }
 }
@@ -89,13 +85,13 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
 
 func layout(g *gocui.Gui) error {
     maxX, maxY := g.Size()
-    if v, err := g.SetView("dir", 0, 0, 30, (maxY / 2) - 2); err != nil {
+    if v, err := g.SetView("dir", 0, 0, 30, maxY - 6); err != nil {
         if err != gocui.ErrUnknownView {
             return err
         }
         v.SetCursor(0,0)
         v.SelFgColor = gocui.ColorBlack
-        v.SelBgColor = gocui.ColorBlue
+        v.SelBgColor = gocui.ColorYellow
         v.Highlight = true
 
         switch benval.Kind() {
@@ -125,7 +121,7 @@ func layout(g *gocui.Gui) error {
         drawContent(v)
     }
 
-    if v, err := g.SetView("info", 0, (maxY / 2) - 1, 30, maxY - 1); err != nil {
+    if v, err := g.SetView("info", 0, maxY - 5, 30, maxY - 1); err != nil {
         if err != gocui.ErrUnknownView {
             return err
         }
