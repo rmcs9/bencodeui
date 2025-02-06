@@ -9,6 +9,15 @@ var target *benparser.Benval
 var id int = -1
 
 func indexInit(bval *benparser.Benval) {
+    if (*bval).Kind() == benparser.Int || (*bval).Kind() == benparser.String {
+        index[0] = bval
+        return
+    }
+
+    indexInitCollection(bval)
+}
+
+func indexInitCollection(bval *benparser.Benval) {
     switch (*bval).Kind() {
     case benparser.Map: 
 
@@ -19,7 +28,7 @@ func indexInit(bval *benparser.Benval) {
 
         for _, key := range keys {
             val, _ := bmap.Query(key)
-            indexInit(val)
+            indexInitCollection(val)
         }
 
     case benparser.List:
@@ -28,14 +37,14 @@ func indexInit(bval *benparser.Benval) {
         id++
         blist := (*bval).(benparser.Benlist)
         for i := range blist.Len() {
-            indexInit(blist.Get(i))
+            indexInitCollection(blist.Get(i))
         }
 
     case benparser.Int: 
-        index[0] = bval
+        index[id] = bval
         id++
     case benparser.String:
-        index[0] = bval
+        index[id] = bval
         id++
     }
 }

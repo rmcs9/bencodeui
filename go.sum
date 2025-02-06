@@ -6,3 +6,5 @@ github.com/nsf/termbox-go v1.1.1 h1:nksUPLCb73Q++DwbYUBEglYBRPZyoXJdrj5L+TkjyZY=
 github.com/nsf/termbox-go v1.1.1/go.mod h1:T0cTdVuOwf7pHQNtfhnEbzHbcNyCEcVU4YPpouCbVxo=
 github.com/rmcs9/benparser v0.0.0-20250109192454-24db13bc4acf h1:g2g2rOEU3cw3fklokQWGvb/KGM+Q1G63DUOAp7UHVT4=
 github.com/rmcs9/benparser v0.0.0-20250109192454-24db13bc4acf/go.mod h1:7Omspdc4S0D0hh8ynoQYq6W4GFWShUmY4amnbq1+/3g=
+github.com/rmcs9/benparser v0.0.0-20250206000905-3ffb8246b468 h1:qAM7g5Ud3ldvwDx3RZn9vJV3P/3tn99IN4Alb64om1w=
+github.com/rmcs9/benparser v0.0.0-20250206000905-3ffb8246b468/go.mod h1:7Omspdc4S0D0hh8ynoQYq6W4GFWShUmY4amnbq1+/3g=
