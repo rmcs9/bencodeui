@@ -32,10 +32,10 @@ func indexInit(bval *benparser.Benval) {
         }
 
     case benparser.Int: 
-        index[id] = bval
+        index[0] = bval
         id++
     case benparser.String:
-        index[id] = bval
+        index[0] = bval
         id++
     }
 }
