@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"log"
     "os"
 
@@ -68,11 +67,12 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
             return err
         }
         target = index[curs] 
-        drawContent(cview)
+        cview.Clear()
+        drawContent(cview, &benval, 1)
         drawInfo(iview)
+
         ox, oy := cview.Origin() 
         _, cy := cview.Size()
-
         if len(cview.BufferLines()) > cy {
             if err := cview.SetOrigin(ox, oy + dy); err != nil {
                 return err
@@ -81,7 +81,6 @@ func moveCursor(dy int) func(*gocui.Gui, *gocui.View) error {
         return nil
     }
 }
-
 
 func layout(g *gocui.Gui) error {
     maxX, maxY := g.Size()
@@ -94,20 +93,7 @@ func layout(g *gocui.Gui) error {
         v.SelBgColor = gocui.ColorYellow
         v.Highlight = true
 
-        switch benval.Kind() {
-        case benparser.Map : 
-            drawMapDir(v, benval, "")
-            v.Title = " dir - map "
-        case benparser.List:
-            drawListDir(v, benval, "")
-            v.Title = " dir - list "
-        case benparser.Int :
-            drawIntDir(v)
-            v.Title = " dir - int "
-        case benparser.String: 
-            drawStringDir(v)
-            v.Title = " dir - string "
-        }
+        drawDir(v, &benval, "")
     }
 
     if v, err := g.SetView("content", 31, 0, maxX -1, maxY -1); err != nil {
@@ -116,9 +102,9 @@ func layout(g *gocui.Gui) error {
         }
         v.Title = "content"
         v.Wrap = true
-        indexInit(&benval)
+        indexInit(&benval, false)
         target = index[0]
-        drawContent(v)
+        drawContent(v, &benval, 1)
     }
 
     if v, err := g.SetView("info", 0, maxY - 5, 30, maxY - 1); err != nil {

@@ -6,38 +6,33 @@ import "sort"
 
 var index map[int]*benparser.Benval = make(map[int]*benparser.Benval)
 var target *benparser.Benval
-var id int = -1
+var id int = 0
 
-func indexInit(bval *benparser.Benval) {
-    if (*bval).Kind() == benparser.Int || (*bval).Kind() == benparser.String {
-        index[0] = bval
-        return
-    }
-
-    indexInitCollection(bval)
-}
-
-func indexInitCollection(bval *benparser.Benval) {
+func indexInit(bval *benparser.Benval, log bool) {
     switch (*bval).Kind() {
     case benparser.Map: 
 
-        index[id] = bval
-        id++
+        if log {
+            index[id] = bval
+            id++
+        }
         bmap := (*bval).(benparser.Benmap)
         keys := bmap.Keys(); sort.Strings(keys)
 
         for _, key := range keys {
             val, _ := bmap.Query(key)
-            indexInitCollection(val)
+            indexInit(val, true)
         }
 
     case benparser.List:
 
-        index[id] = bval
-        id++
+        if log {
+            index[id] = bval
+            id++
+        }
         blist := (*bval).(benparser.Benlist)
         for i := range blist.Len() {
-            indexInitCollection(blist.Get(i))
+            indexInit(blist.Get(i), true)
         }
 
     case benparser.Int: 
